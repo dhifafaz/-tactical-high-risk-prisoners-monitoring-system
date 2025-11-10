@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tactical Dashboard - High-Risk Offender Monitoring</title>
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <i class="fas fa-shield-alt"></i>
+            <h1>TACTICAL MONITORING SYSTEM</h1>
+        </div>
+        <div class="header-center">
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <i class="fas fa-users"></i>
+                    <span>Total: <strong id="total-offenders">0</strong></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-wifi"></i>
+                    <span>Active: <strong id="active-devices">0</strong></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Alerts: <strong id="total-alerts">0</strong></span>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="btn-icon" title="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="badge" id="alert-badge">0</span>
+            </button>
+            <button class="btn-icon" title="Settings">
+                <i class="fas fa-cog"></i>
+            </button>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span id="current-user">Officer Budi</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-view="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>HOME</span>
+                </a>
+                <a href="#" class="nav-item" data-view="offenders">
+                    <i class="fas fa-users"></i>
+                    <span>Offender Registry</span>
+                </a>
+                <a href="#" class="nav-item" data-view="devices">
+                    <i class="fas fa-microchip"></i>
+                    <span>Device System</span>
+                </a>
+                <a href="#" class="nav-item" data-view="alerts">
+                    <i class="fas fa-bell"></i>
+                    <span>Alert Management</span>
+                </a>
+                <a href="#" class="nav-item" data-view="reports">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Analysis & Reports</span>
+                </a>
+                <a href="#" class="nav-item" data-view="realtime">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Real-time Tracking</span>
+                </a>
+            </nav>
+
+            <!-- Offender List -->
+            <div class="offender-list">
+                <div class="list-header">
+                    <h3><i class="fas fa-filter"></i> Filter</h3>
+                    <input type="text" class="search-box" placeholder="Search offenders..." id="search-offenders">
+                </div>
+                <div class="risk-filters">
+                    <button class="filter-btn active" data-risk="all">All</button>
+                    <button class="filter-btn" data-risk="critical">Critical</button>
+                    <button class="filter-btn" data-risk="high">High</button>
+                    <button class="filter-btn" data-risk="medium">Medium</button>
+                    <button class="filter-btn" data-risk="low">Low</button>
+                </div>
+                <div class="offender-items" id="offender-list">
+                    <!-- Offender items will be populated here -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="view active">
+                <div class="map-container">
+                    <div id="map"></div>
+                    <div class="map-controls">
+                        <button class="map-btn" id="center-map" title="Center Map">
+                            <i class="fas fa-crosshairs"></i>
+                        </button>
+                        <button class="map-btn" id="zoom-in" title="Zoom In">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="map-btn" id="zoom-out" title="Zoom Out">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <button class="map-btn" id="toggle-heatmap" title="Toggle Heatmap">
+                            <i class="fas fa-fire"></i>
+                        </button>
+                    </div>
+                    <div class="map-legend">
+                        <h4>Legend</h4>
+                        <div class="legend-item">
+                            <span class="marker-icon critical"></span>
+                            <span>Critical Risk</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="marker-icon high"></span>
+                            <span>High Risk</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="marker-icon medium"></span>
+                            <span>Medium Risk</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="marker-icon low"></span>
+                            <span>Low Risk</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Offender Detail View (Hidden by default) -->
+            <div id="offender-detail-view" class="view">
+                <button class="btn-back" id="back-to-dashboard">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+                <div class="detail-container">
+                    <div class="detail-panel">
+                        <div class="profile-header">
+                            <img src="https://via.placeholder.com/150" alt="Offender Photo" id="detail-photo">
+                            <div class="profile-info">
+                                <h2 id="detail-name">-</h2>
+                                <span class="risk-badge" id="detail-risk">-</span>
+                                <span class="crime-badge" id="detail-crime">-</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>ID Number</label>
+                                <span id="detail-id-number">-</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Date of Birth</label>
+                                <span id="detail-dob">-</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Address</label>
+                                <span id="detail-address">-</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Phone</label>
+                                <span id="detail-phone">-</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Case Officer</label>
+                                <span id="detail-officer">-</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Device ID</label>
+                                <span id="detail-device">-</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Monitoring Period</label>
+                                <span id="detail-period">-</span>
+                            </div>
+                            <div class="info-item full-width">
+                                <label>Notes</label>
+                                <span id="detail-notes">-</span>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </button>
+                            <button class="btn btn-secondary">
+                                <i class="fas fa-file-alt"></i> Generate Report
+                            </button>
+                            <button class="btn btn-warning">
+                                <i class="fas fa-bell"></i> Create Alert
+                            </button>
+                        </div>
+                    </div>
+                    <div class="detail-map-container">
+                        <div id="detail-map"></div>
+                        <div class="location-info">
+                            <h3>Current Location</h3>
+                            <p id="detail-location">-</p>
+                            <p id="detail-last-update">Last Update: -</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Device Registration View -->
+            <div id="devices-view" class="view">
+                <div class="view-header">
+                    <h2><i class="fas fa-microchip"></i> Device Management</h2>
+                    <button class="btn btn-primary" id="show-device-form">
+                        <i class="fas fa-plus"></i> Register New Device
+                    </button>
+                </div>
+                
+                <!-- Device Registration Form -->
+                <div id="device-form" class="form-container hidden">
+                    <h3>Register New Device</h3>
+                    <form id="register-device-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="device-id">Device ID*</label>
+                                <input type="text" id="device-id" required placeholder="e.g., device-003">
+                            </div>
+                            <div class="form-group">
+                                <label for="device-type">Device Type*</label>
+                                <select id="device-type" required>
+                                    <option value="ankle-monitor">Ankle Monitor</option>
+                                    <option value="gps-tracker">GPS Tracker</option>
+                                    <option value="mobile-app">Mobile Application</option>
+                                    <option value="other">Desktop</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="case-id">Case ID*</label>
+                                <input type="text" id="case-id" required placeholder="e.g., case-2024-003">
+                            </div>
+                            <div class="form-group">
+                                <label for="offender-select">Assign to Offender</label>
+                                <select id="offender-select">
+                                    <option value="">None</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Register Device
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancel-device-form">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Device List -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Device ID</th>
+                                <th>Type</th>
+                                <th>Case ID</th>
+                                <th>Assigned To</th>
+                                <th>Status</th>
+                                <th>Battery</th>
+                                <th>Last Update</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="devices-table-body">
+                            <!-- Device rows will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Alerts View -->
+            <div id="alerts-view" class="view">
+                <div class="view-header">
+                    <h2><i class="fas fa-bell"></i> Alert Management</h2>
+                </div>
+                <div class="alerts-container" id="alerts-container">
+                    <!-- Alerts will be populated here -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <div class="widget">
+                <h3>Connection Status</h3>
+                <div class="status-indicator" id="ws-status">
+                    <span class="status-dot offline"></span>
+                    <span>Disconnected</span>
+                </div>
+            </div>
+
+            <div class="widget">
+                <h3>Risk Distribution</h3>
+                <div class="risk-chart">
+                    <div class="chart-item">
+                        <span class="chart-label">Critical</span>
+                        <div class="chart-bar">
+                            <div class="chart-fill critical" id="risk-critical" style="width: 0%"></div>
+                        </div>
+                        <span class="chart-value" id="risk-critical-value">0</span>
+                    </div>
+                    <div class="chart-item">
+                        <span class="chart-label">High</span>
+                        <div class="chart-bar">
+                            <div class="chart-fill high" id="risk-high" style="width: 0%"></div>
+                        </div>
+                        <span class="chart-value" id="risk-high-value">0</span>
+                    </div>
+                    <div class="chart-item">
+                        <span class="chart-label">Medium</span>
+                        <div class="chart-bar">
+                            <div class="chart-fill medium" id="risk-medium" style="width: 0%"></div>
+                        </div>
+                        <span class="chart-value" id="risk-medium-value">0</span>
+                    </div>
+                    <div class="chart-item">
+                        <span class="chart-label">Low</span>
+                        <div class="chart-bar">
+                            <div class="chart-fill low" id="risk-low" style="width: 0%"></div>
+                        </div>
+                        <span class="chart-value" id="risk-low-value">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="widget">
+                <h3>Recent Alerts</h3>
+                <div class="alert-list" id="recent-alerts">
+                    <!-- Recent alerts will be populated here -->
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <i class="fas fa-info-circle"></i>
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Main Application JS -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
