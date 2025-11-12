@@ -1061,3 +1061,56 @@ body {
         display: none;
     }
 }
+
+/* Additional styles for action buttons - Add this to your existing styles.css */
+
+/* ==================== BUTTON IMPROVEMENTS ==================== */
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    margin: 0 0.25rem;
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c62828;
+    transform: translateY(-2px);
+}
+
+/* Action buttons in table */
+.data-table td:last-child {
+    white-space: nowrap;
+}
+
+/* Delete button in offender detail */
+.btn-delete-offender {
+    margin-top: 1rem;
+}
+
+/* Disabled input field */
+input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--secondary-bg) !important;
+}
+
+/* Toast improvements for different types */
+.toast.success {
+    border-color: var(--success);
+}
+
+.toast.error {
+    border-color: var(--danger);
+}
+
+.toast.warning {
+    border-color: var(--warning);
+}
+
+.toast.info {
+    border-color: var(--accent-blue);
+}

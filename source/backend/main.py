@@ -151,6 +151,19 @@ async def register_device(device: Device):
     if device.id in devices_db:
         raise HTTPException(status_code=400, detail="Device already registered")
     
+    # ✅ Check if offender is already assigned to another device
+    if device.offender_id:
+        for existing_device in devices_db.values():
+            if existing_device.offender_id == device.offender_id:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Offender is already assigned to device {existing_device.id}"
+                )
+        
+        # Update offender's device_id
+        if device.offender_id in offenders_db:
+            offenders_db[device.offender_id].device_id = device.id
+    
     devices_db[device.id] = device
     return {"message": "Device registered successfully", "device": device}
 
@@ -171,6 +184,20 @@ async def update_device(device_id: str, device: Device):
     """Update device information"""
     if device_id not in devices_db:
         raise HTTPException(status_code=404, detail="Device not found")
+    
+    # ✅ Check if offender is being reassigned to a different device
+    if device.offender_id:
+        for existing_device_id, existing_device in devices_db.items():
+            if (existing_device_id != device_id and 
+                existing_device.offender_id == device.offender_id):
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Offender is already assigned to device {existing_device_id}"
+                )
+        
+        # Update offender's device_id
+        if device.offender_id in offenders_db:
+            offenders_db[device.offender_id].device_id = device.id
     
     devices_db[device_id] = device
     return {"message": "Device updated successfully", "device": device}
@@ -428,10 +455,10 @@ async def startup_event():
         current_location={"lat": -6.2088, "lon": 106.8456, "alt": 0},
         geofence_zones=[
             {
-                "name": "School Zone - SDN 01",
-                "lat": -6.2100,
-                "lon": 106.8500,
-                "radius": 500,
+                "name": "Sekolah Islam Amelia",
+                "lat": -6.2786615,
+                "lon": 106.6919076,
+                "radius": 2500,
                 "type": "exclusion"
             }
         ],

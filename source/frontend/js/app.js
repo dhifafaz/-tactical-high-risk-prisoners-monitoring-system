@@ -1,4 +1,4 @@
-// Main Application Logic for Tactical Dashboard
+// Main Application Logic for Tactical Dashboard - UPDATED
 
 // ==================== STATE MANAGEMENT ====================
 const appState = {
@@ -9,8 +9,45 @@ const appState = {
     currentView: 'dashboard',
     selectedOffender: null,
     filteredOffenders: [],
-    currentRiskFilter: 'all'
+    currentRiskFilter: 'all',
+    editingDevice: null // For tracking which device is being edited
 };
+
+// ==================== NOTIFICATION SOUND ====================
+let notificationSound = null;
+let isAudioUnlocked = false; // <-- ADD THIS LINE
+
+// Initialize notification sound when available
+document.addEventListener('DOMContentLoaded', () => {
+    // Wait for the library to be loaded
+    if (typeof SimpleNotificationSounds !== 'undefined') {
+        notificationSound = SimpleNotificationSounds;
+        console.log('✅ Notification sound library loaded');
+    }
+});
+
+// Play notification sound
+function playAlertSound(type = 'alert') {
+    if (notificationSound) {
+        try {
+            switch(type) {
+                case 'critical':
+                notificationSound.playAlert('long'); // Added 'play'
+                break;
+                case 'warning':
+                notificationSound.playWarning('medium'); // Added 'play'
+                break;
+                case 'success':
+                notificationSound.playSuccess('short'); // Added 'play'
+                break;
+                default:
+                notificationSound.playAttention('medium'); // Added 'play'
+            }
+            } catch (error) {
+            console.error('Error playing sound:', error);
+        }
+    }
+}
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', async () => {
@@ -34,6 +71,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Start periodic updates
     startPeriodicUpdates();
+
+    const unlockAudio = () => {
+        if (isAudioUnlocked) return;
+        
+        isAudioUnlocked = true;
+        console.log('Audio unlocked by user gesture.');
+
+        // --- ADD THIS LINE ---
+        // Play a silent or simple sound to "wake up" the AudioContext.
+        // This will resume the library's suspended context.
+        if (notificationSound) {
+             notificationSound.playSuccess('short'); // Or use .playAttention('short')
+        }
+        // --- END OF NEW LINE ---
+
+        // Remove the listeners so this only runs once
+        document.removeEventListener('click', unlockAudio);
+        document.removeEventListener('keydown', unlockAudio);
+    };
+
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('keydown', unlockAudio);
     
     console.log('✅ Dashboard initialized successfully');
 });
@@ -183,6 +242,9 @@ function handleLocationUpdate(data) {
         // Update marker on map
         mainMap.updateMarkerPosition(offender.id, location.lat, location.lon);
         
+        // Check proximity to vital POIs
+        checkVitalPOIProximity(offender, location);
+        
         console.log(`📍 Location updated for ${offender.name}:`, location);
     } else {
         // This is an unassigned device - still show it on the map
@@ -204,9 +266,70 @@ function handleLocationUpdate(data) {
     }
 }
 
+// ==================== VITAL POI PROXIMITY CHECK ====================
+function checkVitalPOIProximity(offender, location) {
+    if (!offender.geofence_zones || offender.geofence_zones.length === 0) {
+        return;
+    }
+    
+    offender.geofence_zones.forEach(zone => {
+        // Only check zones marked as "vital" or "exclusion"
+        if (zone.type !== 'exclusion' && !zone.vital) {
+            return;
+        }
+        
+        const distance = calculateDistance(
+            location.lat,
+            location.lon,
+            zone.lat,
+            zone.lon
+        );
+        
+        const radius = zone.radius || 100; // meters
+        
+        // If offender is within the vital POI radius
+        if (distance < radius) {
+            // Play alert sound
+            playAlertSound('critical');
+            
+            // Create visual alert
+            const alertMessage = `⚠️ ${offender.name} is near vital POI: ${zone.name}`;
+            showToast(alertMessage, 'warning');
+            
+            // Log for debugging
+            console.log(`🚨 POI ALERT: ${offender.name} within ${Math.round(distance)}m of ${zone.name}`);
+        }
+    });
+}
+
+// Calculate distance between two coordinates using Haversine formula
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Earth radius in meters
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in meters
+}
+
 function handleNewAlert(alert) {
     // Add alert to state
     appState.alerts.unshift(alert);
+    
+    // Play sound based on severity
+    if (alert.severity === 'critical') {
+        playAlertSound('critical');
+    } else if (alert.severity === 'high') {
+        playAlertSound('warning');
+    } else {
+        playAlertSound('alert');
+    }
     
     // Update alerts display
     renderAlerts(appState.alerts);
@@ -250,23 +373,36 @@ function renderDeviceList(devices) {
     
     tbody.innerHTML = '';
     
-    // Populate offender select
+    // Populate offender select - ONLY show unassigned offenders
     const offenderSelect = document.getElementById('offender-select');
     if (offenderSelect) {
         offenderSelect.innerHTML = '<option value="">None</option>';
+        
+        // Get list of already assigned offender IDs (excluding currently editing device)
+        const assignedOffenderIds = new Set(
+            appState.devices
+                .filter(d => d.offender_id && (!appState.editingDevice || d.id !== appState.editingDevice.id))
+                .map(d => d.offender_id)
+        );
+        
+        // Only add offenders that are NOT already assigned
         appState.offenders.forEach(offender => {
-            const option = document.createElement('option');
-            option.value = offender.id;
-            option.textContent = `${offender.name} (${offender.id_number})`;
-            offenderSelect.appendChild(option);
+            if (!assignedOffenderIds.has(offender.id)) {
+                const option = document.createElement('option');
+                option.value = offender.id;
+                option.textContent = `${offender.name} (${offender.id_number})`;
+                offenderSelect.appendChild(option);
+            }
         });
     }
     
     devices.forEach(device => {
         const row = document.createElement('tr');
         
-        // Find assigned offender
-        const assignedOffender = appState.offenders.find(o => o.device_id === device.id);
+        // Find assigned offender by device.offender_id
+        const assignedOffender = device.offender_id 
+            ? appState.offenders.find(o => o.id === device.offender_id)
+            : null;
         
         row.innerHTML = `
             <td>${device.id}</td>
@@ -277,8 +413,14 @@ function renderDeviceList(devices) {
             <td>${device.battery_level}%</td>
             <td>${new Date(device.last_update).toLocaleString()}</td>
             <td>
-                <button class="btn btn-primary btn-sm" onclick="connectDevice('${device.id}', '${device.device_type}', '${device.case_id}')">
+                <button class="btn btn-primary btn-sm" onclick="connectDevice('${device.id}', '${device.device_type}', '${device.case_id}')" title="Connect to GPS">
                     <i class="fas fa-link"></i>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="editDevice('${device.id}')" title="Edit Device">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="deleteDevice('${device.id}')" title="Delete Device">
+                    <i class="fas fa-trash"></i>
                 </button>
             </td>
         `;
@@ -365,20 +507,6 @@ function showOffenderDetail(offenderId) {
     
     appState.selectedOffender = offender;
     
-    // Handle photo display
-    const photoContainer = document.getElementById('detail-photo-container');
-    if (photoContainer) {
-        if (offender.photo_url) {
-            photoContainer.innerHTML = `<img src="${offender.photo_url}" alt="Offender Photo">`;
-        } else {
-            photoContainer.innerHTML = `
-                <div class="default-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-            `;
-        }
-    }
-    
     // Populate detail view
     document.getElementById('detail-name').textContent = offender.name;
     document.getElementById('detail-risk').textContent = offender.risk_level.toUpperCase();
@@ -403,6 +531,24 @@ function showOffenderDetail(offenderId) {
             `Last Update: ${new Date().toLocaleTimeString()}`;
     }
     
+    // Add delete button handler
+    const detailContainer = document.querySelector('.detail-panel');
+    if (detailContainer) {
+        // Check if delete button already exists
+        let deleteBtn = detailContainer.querySelector('.btn-delete-offender');
+        if (!deleteBtn) {
+            deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-danger btn-delete-offender';
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Delete Offender';
+            deleteBtn.onclick = () => deleteOffender(offender.id);
+            
+            const actionButtons = detailContainer.querySelector('.action-buttons');
+            if (actionButtons) {
+                actionButtons.appendChild(deleteBtn);
+            }
+        }
+    }
+    
     // Switch to detail view
     switchView('offender-detail');
     
@@ -424,38 +570,184 @@ function showOffenderDetail(offenderId) {
 // Make function global for onclick in popup
 window.showOffenderDetail = showOffenderDetail;
 
+// ==================== DELETE OFFENDER ====================
+async function deleteOffender(offenderId) {
+    const offender = appState.offenders.find(o => o.id === offenderId);
+    if (!offender) return;
+    
+    // Confirm deletion
+    if (!confirm(`Are you sure you want to delete offender "${offender.name}"? This action cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        await api.deleteOffender(offenderId);
+        
+        // Remove from state
+        appState.offenders = appState.offenders.filter(o => o.id !== offenderId);
+        appState.filteredOffenders = appState.filteredOffenders.filter(o => o.id !== offenderId);
+        
+        // Remove marker from map
+        mainMap.removeMarker(offenderId);
+        
+        // Update UI
+        renderOffenderList(appState.offenders);
+        
+        // Go back to dashboard
+        switchView('dashboard');
+        
+        showToast(`Offender "${offender.name}" deleted successfully`, 'success');
+    } catch (error) {
+        console.error('Error deleting offender:', error);
+        showToast('Error deleting offender', 'error');
+    }
+}
+
+window.deleteOffender = deleteOffender;
+
 // ==================== DEVICE MANAGEMENT ====================
 function showDeviceForm() {
+    appState.editingDevice = null;
     document.getElementById('device-form').classList.remove('hidden');
+    document.getElementById('register-device-form').reset();
+    document.querySelector('#device-form h3').textContent = 'Register New Device';
+    
+    // Change button text
+    const submitBtn = document.querySelector('#register-device-form button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Register Device';
+    }
 }
 
 function hideDeviceForm() {
     document.getElementById('device-form').classList.add('hidden');
     document.getElementById('register-device-form').reset();
+    appState.editingDevice = null;
 }
+
+// ==================== EDIT DEVICE ====================
+function editDevice(deviceId) {
+    const device = appState.devices.find(d => d.id === deviceId);
+    if (!device) return;
+    
+    appState.editingDevice = device;
+    
+    // Show form
+    document.getElementById('device-form').classList.remove('hidden');
+    
+    // Populate form with existing data
+    document.getElementById('device-id').value = device.id;
+    document.getElementById('device-id').disabled = true; // Can't change device ID
+    document.getElementById('device-type').value = device.device_type;
+    document.getElementById('case-id').value = device.case_id;
+    document.getElementById('offender-select').value = device.offender_id || '';
+    
+    // Update form title and button
+    document.querySelector('#device-form h3').textContent = 'Edit Device';
+    const submitBtn = document.querySelector('#register-device-form button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Update Device';
+    }
+    
+    // Re-render device list to update offender dropdown
+    renderDeviceList(appState.devices);
+}
+
+window.editDevice = editDevice;
+
+// ==================== DELETE DEVICE ====================
+async function deleteDevice(deviceId) {
+    const device = appState.devices.find(d => d.id === deviceId);
+    if (!device) return;
+    
+    // Confirm deletion
+    if (!confirm(`Are you sure you want to delete device "${device.id}"? This action cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        await api.deleteDevice(deviceId);
+        
+        // Remove from state
+        appState.devices = appState.devices.filter(d => d.id !== deviceId);
+        
+        // Update any offenders assigned to this device
+        appState.offenders.forEach(offender => {
+            if (offender.device_id === deviceId) {
+                offender.device_id = null;
+            }
+        });
+        
+        // Update UI
+        renderDeviceList(appState.devices);
+        renderOffenderList(appState.offenders);
+        
+        showToast(`Device "${device.id}" deleted successfully`, 'success');
+    } catch (error) {
+        console.error('Error deleting device:', error);
+        showToast('Error deleting device', 'error');
+    }
+}
+
+window.deleteDevice = deleteDevice;
 
 async function handleDeviceRegistration(e) {
     e.preventDefault();
+    
+    const selectedOffenderId = document.getElementById('offender-select').value || null;
     
     const deviceData = {
         id: document.getElementById('device-id').value,
         device_type: document.getElementById('device-type').value,
         case_id: document.getElementById('case-id').value,
-        offender_id: document.getElementById('offender-select').value || null,
+        offender_id: selectedOffenderId,
         status: 'offline',
         battery_level: 100,
         last_update: new Date().toISOString()
     };
     
     try {
-        await api.registerDevice(deviceData);
-        appState.devices.push(deviceData);
+        if (appState.editingDevice) {
+            // Update existing device
+            await api.updateDevice(deviceData.id, deviceData);
+            
+            // Update in state
+            const index = appState.devices.findIndex(d => d.id === deviceData.id);
+            if (index !== -1) {
+                appState.devices[index] = deviceData;
+            }
+            
+            showToast('Device updated successfully', 'success');
+        } else {
+            // Register new device
+            await api.registerDevice(deviceData);
+            appState.devices.push(deviceData);
+            showToast('Device registered successfully', 'success');
+        }
+        
+        // Update offender's device_id in frontend state
+        if (selectedOffenderId) {
+            const offender = appState.offenders.find(o => o.id === selectedOffenderId);
+            if (offender) {
+                offender.device_id = deviceData.id;
+            }
+        }
+        
+        // Re-enable device ID field
+        document.getElementById('device-id').disabled = false;
+        
         renderDeviceList(appState.devices);
         hideDeviceForm();
-        showToast('Device registered successfully', 'success');
     } catch (error) {
-        console.error('Error registering device:', error);
-        showToast('Error registering device', 'error');
+        console.error('Error saving device:', error);
+        
+        if (error.message.includes('already assigned')) {
+            showToast('This offender is already assigned to another device', 'error');
+        } else if (error.message.includes('already registered')) {
+            showToast('Device ID already exists', 'error');
+        } else {
+            showToast('Error saving device', 'error');
+        }
     }
 }
 
@@ -539,6 +831,15 @@ function showToast(message, type = 'info') {
     if (toast && toastMessage) {
         toastMessage.textContent = message;
         toast.classList.remove('hidden');
+        
+        // Play sound based on type, ONLY IF audio is unlocked
+        if (isAudioUnlocked) { // <-- ADD THIS CHECK
+            if (type === 'success') {
+                playAlertSound('success');
+            } else if (type === 'error' || type === 'warning') {
+                playAlertSound('warning');
+            }
+        }
         
         setTimeout(() => {
             toast.classList.add('hidden');
