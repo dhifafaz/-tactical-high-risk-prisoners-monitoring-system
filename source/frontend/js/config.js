@@ -76,6 +76,17 @@ const CONFIG = {
         high: 'High',
         medium: 'Medium',
         low: 'Low'
+    },
+    
+    // POI Types
+    POI_TYPES: {
+        school: 'School',
+        playground: 'Playground',
+        victim_residence: 'Victim Residence',
+        restricted_zone: 'Restricted Zone',
+        hospital: 'Hospital',
+        government_building: 'Government Building',
+        other: 'Other'
     }
 };
 

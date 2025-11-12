@@ -1,3 +1,5 @@
+/* Tactical Dashboard - Complete Styles with POI Enhancements */
+
 /* ==================== ROOT VARIABLES ==================== */
 :root {
     --primary-bg: #0a0e1a;
@@ -17,6 +19,12 @@
     --high: #ff5722;
     --medium: #ff9800;
     --low: #4caf50;
+    --poi-school: #e91e63;
+    --poi-playground: #ff9800;
+    --poi-victim: #f44336;
+    --poi-restricted: #9c27b0;
+    --poi-hospital: #2196f3;
+    --poi-government: #607d8b;
 }
 
 /* ==================== RESET & BASE ==================== */
@@ -329,6 +337,7 @@ body {
     display: none;
     width: 100%;
     height: 100%;
+    overflow-y: auto;
 }
 
 .view.active {
@@ -427,160 +436,109 @@ body {
     background: #78909c;
 }
 
-/* ==================== OFFENDER DETAIL VIEW ==================== */
-.btn-back {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    padding: 0.75rem 1.5rem;
+/* POI Marker Icon in Legend */
+.poi-marker-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-block;
+    background: linear-gradient(135deg, #e91e63, #9c27b0);
+    border: 2px solid white;
+}
+
+/* ==================== VIEW HEADER ==================== */
+.view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem;
+    border-bottom: 1px solid var(--border-color);
     background: var(--secondary-bg);
-    border: 1px solid var(--accent-blue);
-    color: var(--text-primary);
-    border-radius: 6px;
-    cursor: pointer;
-    z-index: 1000;
+}
+
+.view-header h2 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    transition: all 0.3s;
+    color: var(--accent-blue);
 }
 
-.btn-back:hover {
-    background: var(--accent-blue);
-    transform: translateX(-5px);
-}
-
-.detail-container {
-    display: flex;
-    height: 100%;
-    padding-top: 70px;
-}
-
-.detail-panel {
-    width: 400px;
+/* ==================== FORMS ==================== */
+.form-container {
     background: var(--secondary-bg);
-    border-right: 1px solid var(--border-color);
-    overflow-y: auto;
     padding: 2rem;
-}
-
-.profile-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.profile-photo {
-    width: 150px;
-    height: 150px;
-    margin: 0 auto 1rem;
-    border-radius: 50%;
-    border: 4px solid var(--accent-blue);
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--tertiary-bg);
-}
-
-.profile-photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.default-avatar {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-    color: white;
-    font-size: 4rem;
-}
-
-.profile-header img {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    border: 4px solid var(--accent-blue);
-    margin-bottom: 1rem;
-}
-
-.profile-info h2 {
-    margin-bottom: 1rem;
-}
-
-.risk-badge, .crime-badge {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin: 0.25rem;
-}
-
-.risk-badge.critical {
-    background: var(--critical);
-}
-
-.risk-badge.high {
-    background: var(--high);
-}
-
-.risk-badge.medium {
-    background: var(--medium);
-}
-
-.risk-badge.low {
-    background: var(--low);
-}
-
-.crime-badge {
-    background: var(--tertiary-bg);
+    margin: 2rem;
+    border-radius: 8px;
     border: 1px solid var(--border-color);
 }
 
-.info-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+.form-container.hidden {
+    display: none;
 }
 
-.info-item {
+.form-container h3 {
+    margin-bottom: 1.5rem;
+    color: var(--accent-blue);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.info-item.full-width {
+.form-group.full-width {
     grid-column: 1 / -1;
 }
 
-.info-item label {
-    color: var(--text-muted);
-    font-size: 0.85rem;
+.form-group label {
+    color: var(--text-secondary);
     font-weight: 600;
-    text-transform: uppercase;
+    font-size: 0.9rem;
 }
 
-.info-item span {
-    color: var(--text-primary);
+.form-group small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
     padding: 0.75rem;
     background: var(--tertiary-bg);
-    border-radius: 4px;
     border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    outline: none;
+    font-family: inherit;
 }
 
-.action-buttons {
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--accent-blue);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-actions {
     display: flex;
-    flex-direction: column;
     gap: 1rem;
-    margin-top: 2rem;
 }
 
+/* ==================== BUTTONS ==================== */
 .btn {
     padding: 0.75rem 1.5rem;
     border: none;
@@ -592,6 +550,7 @@ body {
     gap: 0.5rem;
     font-weight: 600;
     transition: all 0.3s;
+    font-size: 0.95rem;
 }
 
 .btn-primary {
@@ -623,101 +582,45 @@ body {
     background: #f57c00;
 }
 
-.detail-map-container {
-    flex: 1;
-    position: relative;
+.btn-danger {
+    background: var(--danger);
+    color: white;
 }
 
-.location-info {
+.btn-danger:hover {
+    background: #c62828;
+    transform: translateY(-2px);
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    margin: 0 0.25rem;
+}
+
+.btn-back {
     position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(20, 27, 45, 0.95);
-    padding: 1rem 2rem;
-    border-radius: 8px;
-    border: 1px solid var(--accent-blue);
-    z-index: 1000;
-    text-align: center;
-}
-
-.location-info h3 {
-    color: var(--accent-blue);
-    margin-bottom: 0.5rem;
-}
-
-/* ==================== DEVICE MANAGEMENT ==================== */
-.view-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.view-header h2 {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--accent-blue);
-}
-
-.form-container {
+    top: 20px;
+    left: 20px;
+    padding: 0.75rem 1.5rem;
     background: var(--secondary-bg);
-    padding: 2rem;
-    margin: 2rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-}
-
-.form-container.hidden {
-    display: none;
-}
-
-.form-container h3 {
-    margin-bottom: 1.5rem;
-    color: var(--accent-blue);
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.form-group label {
-    color: var(--text-secondary);
-    font-weight: 600;
-}
-
-.form-group input,
-.form-group select {
-    padding: 0.75rem;
-    background: var(--tertiary-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border: 1px solid var(--accent-blue);
     color: var(--text-primary);
-    outline: none;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-    border-color: var(--accent-blue);
-}
-
-.form-actions {
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 1000;
     display: flex;
-    gap: 1rem;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
 }
 
-/* ==================== TABLE ==================== */
+.btn-back:hover {
+    background: var(--accent-blue);
+    transform: translateX(-5px);
+}
+
+/* ==================== TABLES ==================== */
 .table-container {
     padding: 2rem;
     overflow-x: auto;
@@ -764,11 +667,13 @@ body {
     font-weight: 600;
 }
 
-.status-badge.online {
+.status-badge.online,
+.status-badge.active {
     background: var(--success);
 }
 
-.status-badge.offline {
+.status-badge.offline,
+.status-badge.inactive {
     background: var(--text-muted);
 }
 
@@ -778,6 +683,149 @@ body {
 
 .status-badge.low_battery {
     background: var(--warning);
+}
+
+.risk-badge,
+.crime-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0.25rem;
+}
+
+.risk-badge.critical {
+    background: var(--critical);
+}
+
+.risk-badge.high {
+    background: var(--high);
+}
+
+.risk-badge.medium {
+    background: var(--medium);
+}
+
+.risk-badge.low {
+    background: var(--low);
+}
+
+.crime-badge {
+    background: var(--tertiary-bg);
+    border: 1px solid var(--border-color);
+}
+
+/* ==================== OFFENDER DETAIL ==================== */
+.detail-container {
+    display: flex;
+    height: 100%;
+    padding-top: 70px;
+}
+
+.detail-panel {
+    width: 400px;
+    background: var(--secondary-bg);
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.profile-photo {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    border: 4px solid var(--accent-blue);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--tertiary-bg);
+}
+
+.default-avatar {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+    color: white;
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.profile-info h2 {
+    margin-bottom: 1rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.info-item label {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.info-item span {
+    color: var(--text-primary);
+    padding: 0.75rem;
+    background: var(--tertiary-bg);
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.detail-map-container {
+    flex: 1;
+    position: relative;
+}
+
+.location-info {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 27, 45, 0.95);
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--accent-blue);
+    z-index: 1000;
+    text-align: center;
+}
+
+.location-info h3 {
+    color: var(--accent-blue);
+    margin-bottom: 0.5rem;
 }
 
 /* ==================== RIGHT SIDEBAR ==================== */
@@ -1005,6 +1053,22 @@ body {
     display: none;
 }
 
+.toast.success {
+    border-color: var(--success);
+}
+
+.toast.error {
+    border-color: var(--danger);
+}
+
+.toast.warning {
+    border-color: var(--warning);
+}
+
+.toast.info {
+    border-color: var(--accent-blue);
+}
+
 @keyframes slideIn {
     from {
         transform: translateX(400px);
@@ -1060,57 +1124,4 @@ body {
     .right-sidebar {
         display: none;
     }
-}
-
-/* Additional styles for action buttons - Add this to your existing styles.css */
-
-/* ==================== BUTTON IMPROVEMENTS ==================== */
-.btn-sm {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
-    margin: 0 0.25rem;
-}
-
-.btn-danger {
-    background: var(--danger);
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #c62828;
-    transform: translateY(-2px);
-}
-
-/* Action buttons in table */
-.data-table td:last-child {
-    white-space: nowrap;
-}
-
-/* Delete button in offender detail */
-.btn-delete-offender {
-    margin-top: 1rem;
-}
-
-/* Disabled input field */
-input:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background: var(--secondary-bg) !important;
-}
-
-/* Toast improvements for different types */
-.toast.success {
-    border-color: var(--success);
-}
-
-.toast.error {
-    border-color: var(--danger);
-}
-
-.toast.warning {
-    border-color: var(--warning);
-}
-
-.toast.info {
-    border-color: var(--accent-blue);
 }

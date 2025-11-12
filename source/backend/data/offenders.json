@@ -1,0 +1,46 @@
+{
+  "offender-001": {
+    "id": "offender-001",
+    "name": "Ahmad Wijaya",
+    "id_number": "3174051980120001",
+    "crime_type": "sexual_offense",
+    "risk_level": "high",
+    "photo_url": null,
+    "date_of_birth": "1980-12-15",
+    "address": "Jl. Sudirman No. 123, Jakarta Selatan",
+    "phone": "021-555-0123",
+    "case_officer": "Officer Budi Santoso",
+    "monitoring_start": "2025-11-12 16:47:09.257705",
+    "monitoring_end": "2026-11-12 16:47:09.257706",
+    "device_id": "device-001",
+    "current_location": {
+      "lat": -6.2088,
+      "lon": 106.8456,
+      "alt": 0
+    },
+    "geofence_zones": [],
+    "notes": "High-risk sexual offender. Requires 24/7 monitoring."
+  },
+  "offender-002": {
+    "id": "offender-002",
+    "name": "Budi Setiawan",
+    "id_number": "3175021975080002",
+    "crime_type": "drug_offense",
+    "risk_level": "medium",
+    "photo_url": null,
+    "date_of_birth": "1975-08-20",
+    "address": "Jl. Thamrin No. 45, Jakarta Pusat",
+    "phone": "021-555-0456",
+    "case_officer": "Officer Siti Nurhaliza",
+    "monitoring_start": "2025-11-12 16:47:09.257730",
+    "monitoring_end": "2026-05-11 16:47:09.257731",
+    "device_id": "device-002",
+    "current_location": {
+      "lat": -6.1751,
+      "lon": 106.865,
+      "alt": 0
+    },
+    "geofence_zones": [],
+    "notes": "Drug trafficking case. Curfew from 22:00 to 06:00."
+  }
+}

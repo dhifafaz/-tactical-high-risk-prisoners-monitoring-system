@@ -1,0 +1,24 @@
+{
+  "device-001": {
+    "id": "device-001",
+    "device_type": "ankle-monitor",
+    "case_id": "case-2024-001",
+    "offender_id": null,
+    "status": "online",
+    "battery_level": 85,
+    "last_location": null,
+    "last_update": "2025-11-12 16:47:09.257684",
+    "tamper_detected": false
+  },
+  "device-002": {
+    "id": "device-002",
+    "device_type": "ankle-monitor",
+    "case_id": "case-2024-002",
+    "offender_id": null,
+    "status": "online",
+    "battery_level": 92,
+    "last_location": null,
+    "last_update": "2025-11-12 16:47:09.257700",
+    "tamper_detected": false
+  }
+}

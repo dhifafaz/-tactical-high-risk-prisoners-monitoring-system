@@ -1,0 +1,14 @@
+{
+  "poi-001": {
+    "id": "poi-001",
+    "name": "Sekolah Islam Amelia",
+    "address": "Jl. Raya Kampung Ambon, Serpong, Tangerang Selatan",
+    "lat": -6.2786615,
+    "lon": 106.6919076,
+    "radius": 2500.0,
+    "poi_type": "school",
+    "description": "Elementary school - restricted area for high-risk offenders",
+    "created_at": "2025-11-12 16:47:09.257766",
+    "is_active": true
+  }
+}

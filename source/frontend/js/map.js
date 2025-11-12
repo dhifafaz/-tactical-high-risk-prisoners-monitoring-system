@@ -1,10 +1,12 @@
-// Map Manager for Tactical Dashboard using Leaflet.js
+// Map Manager for Tactical Dashboard - Enhanced with POI Visualization
 
 class MapManager {
     constructor(mapId, options = {}) {
         this.mapId = mapId;
         this.map = null;
         this.markers = new Map();
+        this.poiMarkers = new Map();
+        this.poiCircles = new Map();
         this.options = {
             center: CONFIG.MAP_CONFIG.center,
             zoom: CONFIG.MAP_CONFIG.zoom,
@@ -89,11 +91,6 @@ class MapManager {
         // Store marker reference
         this.markers.set(offender.id, marker);
 
-        // Add geofence zones if any
-        if (offender.geofence_zones && offender.geofence_zones.length > 0) {
-            this.addGeofenceZones(offender.geofence_zones);
-        }
-
         return marker;
     }
 
@@ -158,6 +155,122 @@ class MapManager {
         return marker;
     }
 
+    // ==================== POI MANAGEMENT ====================
+    
+    addPOIMarker(poi) {
+        if (!poi || !poi.lat || !poi.lon) {
+            console.warn(`Invalid POI data:`, poi);
+            return;
+        }
+
+        // POI type colors
+        const poiColors = {
+            school: '#e91e63',
+            playground: '#ff9800',
+            victim_residence: '#f44336',
+            restricted_zone: '#9c27b0',
+            hospital: '#2196f3',
+            government_building: '#607d8b',
+            other: '#9e9e9e'
+        };
+
+        const poiColor = poiColors[poi.poi_type] || poiColors.other;
+
+        // Create POI icon
+        const icon = L.divIcon({
+            className: 'custom-poi-marker',
+            html: `
+                <div style="
+                    background: ${poiColor};
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    border: 3px solid white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    color: white;
+                    font-size: 14px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+                    cursor: pointer;
+                ">
+                    <i class="fas fa-map-pin"></i>
+                </div>
+            `,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+
+        // Create marker
+        const marker = L.marker([poi.lat, poi.lon], { icon })
+            .addTo(this.map)
+            .bindPopup(`
+                <div style="color: #0a0e1a; min-width: 220px;">
+                    <h3 style="margin: 0 0 10px 0; color: ${poiColor};">
+                        <i class="fas fa-map-pin"></i> ${poi.name}
+                    </h3>
+                    <p style="margin: 5px 0;"><strong>Type:</strong> ${poi.poi_type.replace('_', ' ').toUpperCase()}</p>
+                    <p style="margin: 5px 0;"><strong>Address:</strong> ${poi.address}</p>
+                    <p style="margin: 5px 0;"><strong>Safety Radius:</strong> ${poi.radius} meters</p>
+                    ${poi.description ? `<p style="margin: 5px 0; padding: 8px; background: #e3f2fd; border-radius: 4px; font-size: 12px;">${poi.description}</p>` : ''}
+                    <p style="margin: 8px 0 0 0; padding: 8px; background: #ffebee; border-radius: 4px; font-size: 11px; color: #c62828;">
+                        ⚠️ Offenders will trigger alerts when entering this zone
+                    </p>
+                </div>
+            `);
+
+        // Create safety radius circle
+        const circle = L.circle([poi.lat, poi.lon], {
+            color: poiColor,
+            fillColor: poiColor,
+            fillOpacity: 0.15,
+            radius: poi.radius,
+            weight: 2
+        }).addTo(this.map);
+
+        // Store references
+        this.poiMarkers.set(poi.id, marker);
+        this.poiCircles.set(poi.id, circle);
+
+        console.log(`📍 Added POI marker: ${poi.name}`);
+        return { marker, circle };
+    }
+
+    removePOIMarker(poiId) {
+        // Remove marker
+        const marker = this.poiMarkers.get(poiId);
+        if (marker) {
+            this.map.removeLayer(marker);
+            this.poiMarkers.delete(poiId);
+        }
+
+        // Remove circle
+        const circle = this.poiCircles.get(poiId);
+        if (circle) {
+            this.map.removeLayer(circle);
+            this.poiCircles.delete(poiId);
+        }
+
+        console.log(`🗑️ Removed POI marker: ${poiId}`);
+    }
+
+    clearPOIMarkers() {
+        // Remove all POI markers
+        this.poiMarkers.forEach(marker => {
+            this.map.removeLayer(marker);
+        });
+        this.poiMarkers.clear();
+
+        // Remove all POI circles
+        this.poiCircles.forEach(circle => {
+            this.map.removeLayer(circle);
+        });
+        this.poiCircles.clear();
+
+        console.log('🗑️ Cleared all POI markers');
+    }
+
     updateMarkerPosition(offenderId, lat, lon) {
         const marker = this.markers.get(offenderId);
         if (marker) {
@@ -179,33 +292,6 @@ class MapManager {
             this.map.removeLayer(marker);
         });
         this.markers.clear();
-    }
-
-    addGeofenceZones(zones) {
-        zones.forEach(zone => {
-            const circle = L.circle([zone.lat, zone.lon], {
-                color: zone.type === 'exclusion' ? '#f44336' : '#4caf50',
-                fillColor: zone.type === 'exclusion' ? '#f44336' : '#4caf50',
-                fillOpacity: 0.2,
-                radius: zone.radius
-            }).addTo(this.map);
-
-            // Add label
-            const label = L.marker([zone.lat, zone.lon], {
-                icon: L.divIcon({
-                    className: 'geofence-label',
-                    html: `<div style="
-                        background: rgba(0,0,0,0.7);
-                        color: white;
-                        padding: 5px 10px;
-                        border-radius: 4px;
-                        font-size: 12px;
-                        white-space: nowrap;
-                    ">${zone.name}</div>`,
-                    iconSize: [0, 0]
-                })
-            }).addTo(this.map);
-        });
     }
 
     centerOn(lat, lon, zoom = 15) {

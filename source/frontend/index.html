@@ -12,7 +12,7 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    <!-- Add after Font Awesome -->
+    <!-- Notification Sounds -->
     <script src="https://cdn.jsdelivr.net/npm/simple-notification-sounds@1.0.0/dist/simple-notification-sounds.umd.min.js"></script>
 </head>
 <body>
@@ -31,6 +31,10 @@
                 <div class="stat-item">
                     <i class="fas fa-wifi"></i>
                     <span>Active: <strong id="active-devices">0</strong></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>POIs: <strong id="total-pois">0</strong></span>
                 </div>
                 <div class="stat-item">
                     <i class="fas fa-exclamation-triangle"></i>
@@ -69,6 +73,10 @@
                 <a href="#" class="nav-item" data-view="devices">
                     <i class="fas fa-microchip"></i>
                     <span>Device System</span>
+                </a>
+                <a href="#" class="nav-item" data-view="pois">
+                    <i class="fas fa-map-pin"></i>
+                    <span>Points of Interest</span>
                 </a>
                 <a href="#" class="nav-item" data-view="alerts">
                     <i class="fas fa-bell"></i>
@@ -119,8 +127,8 @@
                         <button class="map-btn" id="zoom-out" title="Zoom Out">
                             <i class="fas fa-minus"></i>
                         </button>
-                        <button class="map-btn" id="toggle-heatmap" title="Toggle Heatmap">
-                            <i class="fas fa-fire"></i>
+                        <button class="map-btn" id="toggle-pois" title="Toggle POIs">
+                            <i class="fas fa-map-pin"></i>
                         </button>
                     </div>
                     <div class="map-legend">
@@ -141,11 +149,281 @@
                             <span class="marker-icon low"></span>
                             <span>Low Risk</span>
                         </div>
+                        <div class="legend-item">
+                            <span class="poi-marker-icon"></span>
+                            <span>Point of Interest</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Offender Detail View (Hidden by default) -->
+            <!-- Offender Registry View (NEW - Prisoner Registration) -->
+            <div id="offenders-view" class="view">
+                <div class="view-header">
+                    <h2><i class="fas fa-users"></i> Offender Registry</h2>
+                    <button class="btn btn-primary" id="show-offender-form">
+                        <i class="fas fa-user-plus"></i> Register New Offender
+                    </button>
+                </div>
+                
+                <!-- Offender Registration Form -->
+                <div id="offender-form" class="form-container hidden">
+                    <h3>Register New Offender/Prisoner</h3>
+                    <form id="register-offender-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="offender-name">Full Name*</label>
+                                <input type="text" id="offender-name" required placeholder="Enter full name">
+                            </div>
+                            <div class="form-group">
+                                <label for="offender-id-number">ID Number*</label>
+                                <input type="text" id="offender-id-number" required placeholder="e.g., 3174051980120001">
+                            </div>
+                            <div class="form-group">
+                                <label for="offender-dob">Date of Birth*</label>
+                                <input type="date" id="offender-dob" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="offender-crime">Crime Type*</label>
+                                <select id="offender-crime" required>
+                                    <option value="sexual_offense">Sexual Offense</option>
+                                    <option value="drug_offense">Drug Offense</option>
+                                    <option value="violent_crime">Violent Crime</option>
+                                    <option value="robbery">Robbery</option>
+                                    <option value="homicide">Homicide</option>
+                                    <option value="kidnapping">Kidnapping</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="offender-risk">Risk Level*</label>
+                                <select id="offender-risk" required>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="critical">Critical</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="offender-phone">Phone Number*</label>
+                                <input type="tel" id="offender-phone" required placeholder="e.g., 021-555-0123">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="offender-address">Address*</label>
+                                <input type="text" id="offender-address" required placeholder="Full address">
+                            </div>
+                            <div class="form-group">
+                                <label for="offender-officer">Case Officer*</label>
+                                <input type="text" id="offender-officer" required placeholder="Officer name">
+                            </div>
+                            <div class="form-group">
+                                <label for="offender-device">Assign Device</label>
+                                <select id="offender-device">
+                                    <option value="">None</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="offender-start-date">Monitoring Start*</label>
+                                <input type="date" id="offender-start-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="offender-end-date">Monitoring End*</label>
+                                <input type="date" id="offender-end-date" required>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="offender-notes">Notes</label>
+                                <textarea id="offender-notes" rows="3" placeholder="Additional notes..."></textarea>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Register Offender
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancel-offender-form">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Offender List Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>ID Number</th>
+                                <th>Crime Type</th>
+                                <th>Risk Level</th>
+                                <th>Case Officer</th>
+                                <th>Device</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="offenders-table-body">
+                            <!-- Offender rows will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- POI Management View (NEW) -->
+            <div id="pois-view" class="view">
+                <div class="view-header">
+                    <h2><i class="fas fa-map-pin"></i> Points of Interest Management</h2>
+                    <button class="btn btn-primary" id="show-poi-form">
+                        <i class="fas fa-plus"></i> Add New POI
+                    </button>
+                </div>
+                
+                <!-- POI Registration Form -->
+                <div id="poi-form" class="form-container hidden">
+                    <h3>Add Point of Interest</h3>
+                    <form id="register-poi-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="poi-name">POI Name*</label>
+                                <input type="text" id="poi-name" required placeholder="e.g., Elementary School">
+                            </div>
+                            <div class="form-group">
+                                <label for="poi-type">POI Type*</label>
+                                <select id="poi-type" required>
+                                    <option value="school">School</option>
+                                    <option value="playground">Playground</option>
+                                    <option value="victim_residence">Victim Residence</option>
+                                    <option value="restricted_zone">Restricted Zone</option>
+                                    <option value="hospital">Hospital</option>
+                                    <option value="government_building">Government Building</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="poi-address">Address*</label>
+                                <input type="text" id="poi-address" required placeholder="Full address">
+                            </div>
+                            <div class="form-group">
+                                <label for="poi-lat">Latitude*</label>
+                                <input type="number" id="poi-lat" required step="any" placeholder="-6.2088">
+                            </div>
+                            <div class="form-group">
+                                <label for="poi-lon">Longitude*</label>
+                                <input type="number" id="poi-lon" required step="any" placeholder="106.8456">
+                            </div>
+                            <div class="form-group">
+                                <label for="poi-radius">Safety Radius (meters)*</label>
+                                <input type="number" id="poi-radius" required min="10" placeholder="e.g., 500">
+                                <small>Offenders will be alerted when entering this radius</small>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="poi-description">Description</label>
+                                <textarea id="poi-description" rows="3" placeholder="Additional information about this POI..."></textarea>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save POI
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancel-poi-form">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- POI List -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Address</th>
+                                <th>Coordinates</th>
+                                <th>Radius (m)</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pois-table-body">
+                            <!-- POI rows will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Device Registration View -->
+            <div id="devices-view" class="view">
+                <div class="view-header">
+                    <h2><i class="fas fa-microchip"></i> Device Management</h2>
+                    <button class="btn btn-primary" id="show-device-form">
+                        <i class="fas fa-plus"></i> Register New Device
+                    </button>
+                </div>
+                
+                <!-- Device Registration Form -->
+                <div id="device-form" class="form-container hidden">
+                    <h3>Register New Device</h3>
+                    <form id="register-device-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="device-id">Device ID*</label>
+                                <input type="text" id="device-id" required placeholder="e.g., device-003">
+                            </div>
+                            <div class="form-group">
+                                <label for="device-type">Device Type*</label>
+                                <select id="device-type" required>
+                                    <option value="ankle-monitor">Ankle Monitor</option>
+                                    <option value="gps-tracker">GPS Tracker</option>
+                                    <option value="mobile-app">Mobile Application</option>
+                                    <option value="desktop">Desktop</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="case-id">Case ID*</label>
+                                <input type="text" id="case-id" required placeholder="e.g., case-2024-003">
+                            </div>
+                            <div class="form-group">
+                                <label for="offender-select">Assign to Offender</label>
+                                <select id="offender-select">
+                                    <option value="">None</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Register Device
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancel-device-form">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Device List -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Device ID</th>
+                                <th>Type</th>
+                                <th>Case ID</th>
+                                <th>Assigned To</th>
+                                <th>Status</th>
+                                <th>Battery</th>
+                                <th>Last Update</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="devices-table-body">
+                            <!-- Device rows will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Offender Detail View -->
             <div id="offender-detail-view" class="view">
                 <button class="btn-back" id="back-to-dashboard">
                     <i class="fas fa-arrow-left"></i> Back to Dashboard
@@ -153,7 +431,9 @@
                 <div class="detail-container">
                     <div class="detail-panel">
                         <div class="profile-header">
-                            <img src="https://via.placeholder.com/150" alt="Offender Photo" id="detail-photo">
+                            <div class="profile-photo">
+                                <div class="default-avatar" id="detail-avatar">?</div>
+                            </div>
                             <div class="profile-info">
                                 <h2 id="detail-name">-</h2>
                                 <span class="risk-badge" id="detail-risk">-</span>
@@ -170,7 +450,7 @@
                                 <label>Date of Birth</label>
                                 <span id="detail-dob">-</span>
                             </div>
-                            <div class="info-item">
+                            <div class="info-item full-width">
                                 <label>Address</label>
                                 <span id="detail-address">-</span>
                             </div>
@@ -216,78 +496,6 @@
                             <p id="detail-last-update">Last Update: -</p>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Device Registration View -->
-            <div id="devices-view" class="view">
-                <div class="view-header">
-                    <h2><i class="fas fa-microchip"></i> Device Management</h2>
-                    <button class="btn btn-primary" id="show-device-form">
-                        <i class="fas fa-plus"></i> Register New Device
-                    </button>
-                </div>
-                
-                <!-- Device Registration Form -->
-                <div id="device-form" class="form-container hidden">
-                    <h3>Register New Device</h3>
-                    <form id="register-device-form">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="device-id">Device ID*</label>
-                                <input type="text" id="device-id" required placeholder="e.g., device-003">
-                            </div>
-                            <div class="form-group">
-                                <label for="device-type">Device Type*</label>
-                                <select id="device-type" required>
-                                    <option value="ankle-monitor">Ankle Monitor</option>
-                                    <option value="gps-tracker">GPS Tracker</option>
-                                    <option value="mobile-app">Mobile Application</option>
-                                    <option value="other">Desktop</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="case-id">Case ID*</label>
-                                <input type="text" id="case-id" required placeholder="e.g., case-2024-003">
-                            </div>
-                            <div class="form-group">
-                                <label for="offender-select">Assign to Offender</label>
-                                <select id="offender-select">
-                                    <option value="">None</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Register Device
-                            </button>
-                            <button type="button" class="btn btn-secondary" id="cancel-device-form">
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Device List -->
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Device ID</th>
-                                <th>Type</th>
-                                <th>Case ID</th>
-                                <th>Assigned To</th>
-                                <th>Status</th>
-                                <th>Battery</th>
-                                <th>Last Update</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="devices-table-body">
-                            <!-- Device rows will be populated here -->
-                        </tbody>
-                    </table>
                 </div>
             </div>
 

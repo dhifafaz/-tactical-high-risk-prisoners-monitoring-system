@@ -1,4 +1,4 @@
-// API Client for Tactical Dashboard
+// API Client for Tactical Dashboard - Enhanced with POI Support
 
 class APIClient {
     constructor(baseURL) {
@@ -85,6 +85,36 @@ class APIClient {
 
     async deleteOffender(offenderId) {
         return await this.request(`/offenders/${offenderId}`, {
+            method: 'DELETE'
+        });
+    }
+
+    // ==================== POI ENDPOINTS ====================
+    
+    async createPOI(poiData) {
+        return await this.request('/pois', {
+            method: 'POST',
+            body: JSON.stringify(poiData)
+        });
+    }
+
+    async getPOIs() {
+        return await this.request('/pois');
+    }
+
+    async getPOI(poiId) {
+        return await this.request(`/pois/${poiId}`);
+    }
+
+    async updatePOI(poiId, poiData) {
+        return await this.request(`/pois/${poiId}`, {
+            method: 'PUT',
+            body: JSON.stringify(poiData)
+        });
+    }
+
+    async deletePOI(poiId) {
+        return await this.request(`/pois/${poiId}`, {
             method: 'DELETE'
         });
     }
