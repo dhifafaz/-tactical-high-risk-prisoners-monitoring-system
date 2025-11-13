@@ -159,9 +159,11 @@ class MapManager {
     
     addPOIMarker(poi) {
         if (!poi || !poi.lat || !poi.lon) {
-            console.warn(`Invalid POI data:`, poi);
+            console.warn(`⚠️ Invalid POI data:`, poi);
             return;
         }
+
+        console.log(`📍 Adding POI marker: ${poi.name} at (${poi.lat}, ${poi.lon})`);
 
         // POI type colors
         const poiColors = {
@@ -175,6 +177,7 @@ class MapManager {
         };
 
         const poiColor = poiColors[poi.poi_type] || poiColors.other;
+        console.log(`  Color for ${poi.poi_type}: ${poiColor}`);
 
         // Create POI icon
         const icon = L.divIcon({
@@ -233,7 +236,7 @@ class MapManager {
         this.poiMarkers.set(poi.id, marker);
         this.poiCircles.set(poi.id, circle);
 
-        console.log(`📍 Added POI marker: ${poi.name}`);
+        console.log(`✅ Added POI marker and circle for: ${poi.name}`);
         return { marker, circle };
     }
 

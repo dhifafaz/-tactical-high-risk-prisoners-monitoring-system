@@ -20,5 +20,20 @@
     "last_location": null,
     "last_update": "2025-11-12 16:47:09.257700",
     "tamper_detected": false
+  },
+  "user-mobile-123": {
+    "id": "user-mobile-123",
+    "device_type": "ankle-monitor",
+    "case_id": "demo-123",
+    "offender_id": "3be941ce-b907-4428-b198-ac2f9b9fe497",
+    "status": "offline",
+    "battery_level": 100,
+    "last_location": {
+      "lat": -6.2683,
+      "lon": 106.6871,
+      "alt": 63.39999771118164
+    },
+    "last_update": "2025-11-12 19:08:58.791590",
+    "tamper_detected": false
   }
 }

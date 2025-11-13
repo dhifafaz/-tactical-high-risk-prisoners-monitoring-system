@@ -1,4 +1,5 @@
-// Main Application Logic for Tactical Dashboard - Enhanced with Prisoner Registration and POI
+// Main Application Logic for Tactical Dashboard - FIXED VERSION
+// Fixes: Form display issues, POI rendering, event listeners
 
 // ==================== STATE MANAGEMENT ====================
 const appState = {
@@ -57,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     mainMap = new MapManager('map');
     mainMap.initialize();
     
-    // Setup event listeners
+    // Setup event listeners FIRST
     setupEventListeners();
     
     // Load initial data
@@ -113,6 +114,7 @@ async function loadInitialData() {
         console.log('  Loading POIs...');
         appState.pois = await api.getPOIs();
         console.log(`  ✅ Loaded ${appState.pois.length} POIs`);
+        console.log('  POI Data:', appState.pois);
         renderPOIList(appState.pois);
         
         // Load alerts
@@ -142,6 +144,7 @@ async function loadInitialData() {
         console.log('  Adding POI markers to map...');
         let poiMarkersAdded = 0;
         appState.pois.forEach(poi => {
+            console.log('  Adding POI to map:', poi);
             if (poi.is_active) {
                 mainMap.addPOIMarker(poi);
                 poiMarkersAdded++;
@@ -174,7 +177,7 @@ async function loadInitialData() {
     }
 }
 
-// ==================== EVENT LISTENERS ====================
+// ==================== EVENT LISTENERS - FIXED ====================
 function setupEventListeners() {
     console.log('🔧 Setting up event listeners...');
     
@@ -184,11 +187,14 @@ function setupEventListeners() {
     });
     
     // Map controls
-    document.getElementById('center-map')?.addEventListener('click', () => mainMap.recenter());
-    document.getElementById('zoom-in')?.addEventListener('click', () => mainMap.zoomIn());
-    document.getElementById('zoom-out')?.addEventListener('click', () => mainMap.zoomOut());
-    
+    const centerMapBtn = document.getElementById('center-map');
+    const zoomInBtn = document.getElementById('zoom-in');
+    const zoomOutBtn = document.getElementById('zoom-out');
     const togglePOIsBtn = document.getElementById('toggle-pois');
+    
+    if (centerMapBtn) centerMapBtn.addEventListener('click', () => mainMap.recenter());
+    if (zoomInBtn) zoomInBtn.addEventListener('click', () => mainMap.zoomIn());
+    if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => mainMap.zoomOut());
     if (togglePOIsBtn) {
         togglePOIsBtn.addEventListener('click', togglePOIs);
         console.log('✅ Toggle POIs button listener attached');
@@ -200,54 +206,90 @@ function setupEventListeners() {
         backBtn.addEventListener('click', () => switchView('dashboard'));
     }
     
-    // Use event delegation for form buttons (they might be in hidden views)
-    document.body.addEventListener('click', (e) => {
-        const target = e.target.closest('button');
-        if (!target) return;
-        
-        // Offender form buttons
-        if (target.id === 'show-offender-form') {
+    // FIXED: Direct button event listeners instead of delegation
+    // Offender form buttons
+    const showOffenderFormBtn = document.getElementById('show-offender-form');
+    const cancelOffenderFormBtn = document.getElementById('cancel-offender-form');
+    if (showOffenderFormBtn) {
+        showOffenderFormBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            console.log('✅ Show offender form button clicked');
             showOffenderForm();
-        } else if (target.id === 'cancel-offender-form') {
+        });
+        console.log('✅ Show offender form button listener attached');
+    } else {
+        console.warn('⚠️ Show offender form button not found');
+    }
+    if (cancelOffenderFormBtn) {
+        cancelOffenderFormBtn.addEventListener('click', (e) => {
             e.preventDefault();
             hideOffenderForm();
-        }
-        // Device form buttons
-        else if (target.id === 'show-device-form') {
+        });
+    }
+    
+    // Device form buttons
+    const showDeviceFormBtn = document.getElementById('show-device-form');
+    const cancelDeviceFormBtn = document.getElementById('cancel-device-form');
+    if (showDeviceFormBtn) {
+        showDeviceFormBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            console.log('✅ Show device form button clicked');
             showDeviceForm();
-        } else if (target.id === 'cancel-device-form') {
+        });
+        console.log('✅ Show device form button listener attached');
+    } else {
+        console.warn('⚠️ Show device form button not found');
+    }
+    if (cancelDeviceFormBtn) {
+        cancelDeviceFormBtn.addEventListener('click', (e) => {
             e.preventDefault();
             hideDeviceForm();
-        }
-        // POI form buttons
-        else if (target.id === 'show-poi-form') {
+        });
+    }
+    
+    // POI form buttons
+    const showPOIFormBtn = document.getElementById('show-poi-form');
+    const cancelPOIFormBtn = document.getElementById('cancel-poi-form');
+    if (showPOIFormBtn) {
+        showPOIFormBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            console.log('✅ Show POI form button clicked');
             showPOIForm();
-        } else if (target.id === 'cancel-poi-form') {
+        });
+        console.log('✅ Show POI form button listener attached');
+    } else {
+        console.warn('⚠️ Show POI form button not found');
+    }
+    if (cancelPOIFormBtn) {
+        cancelPOIFormBtn.addEventListener('click', (e) => {
             e.preventDefault();
             hidePOIForm();
-        }
-    });
+        });
+    }
     
     // Form submissions
     const offenderForm = document.getElementById('register-offender-form');
     if (offenderForm) {
         offenderForm.addEventListener('submit', handleOffenderRegistration);
         console.log('✅ Offender form submission listener attached');
+    } else {
+        console.warn('⚠️ Offender form not found');
     }
     
     const deviceForm = document.getElementById('register-device-form');
     if (deviceForm) {
         deviceForm.addEventListener('submit', handleDeviceRegistration);
         console.log('✅ Device form submission listener attached');
+    } else {
+        console.warn('⚠️ Device form not found');
     }
     
     const poiForm = document.getElementById('register-poi-form');
     if (poiForm) {
         poiForm.addEventListener('submit', handlePOIRegistration);
         console.log('✅ POI form submission listener attached');
+    } else {
+        console.warn('⚠️ POI form not found');
     }
     
     // Search and filter
@@ -276,6 +318,8 @@ function handleNavigation(e) {
 }
 
 function switchView(viewName) {
+    console.log(`🔄 Switching to view: ${viewName}`);
+    
     document.querySelectorAll('.view').forEach(view => {
         view.classList.remove('active');
     });
@@ -285,11 +329,22 @@ function switchView(viewName) {
         viewElement.classList.add('active');
         appState.currentView = viewName;
         
-        if (viewName === 'dashboard') {
+        console.log(`✅ Switched to ${viewName} view`);
+        
+        // Re-render data for the current view
+        if (viewName === 'offenders') {
+            renderOffendersTable(appState.offenders);
+        } else if (viewName === 'pois') {
+            renderPOIList(appState.pois);
+        } else if (viewName === 'devices') {
+            renderDeviceList(appState.devices);
+        } else if (viewName === 'dashboard') {
             setTimeout(() => {
                 mainMap.map.invalidateSize();
             }, 100);
         }
+    } else {
+        console.error(`❌ View element not found: ${viewName}-view`);
     }
 }
 
@@ -419,10 +474,16 @@ function showOffenderForm() {
         return;
     }
     
+    if (!form) {
+        console.error('❌ Offender form not found!');
+        return;
+    }
+    
     formContainer.classList.remove('hidden');
     form.reset();
     
-    console.log('✅ Form container classes:', formContainer.className);
+    console.log('✅ Form container classes after showing:', formContainer.className);
+    console.log('✅ Form container display:', window.getComputedStyle(formContainer).display);
     
     // Set default dates
     const today = new Date().toISOString().split('T')[0];
@@ -455,8 +516,15 @@ function showOffenderForm() {
 }
 
 function hideOffenderForm() {
-    document.getElementById('offender-form').classList.add('hidden');
-    document.getElementById('register-offender-form').reset();
+    const formContainer = document.getElementById('offender-form');
+    const form = document.getElementById('register-offender-form');
+    
+    if (formContainer) {
+        formContainer.classList.add('hidden');
+    }
+    if (form) {
+        form.reset();
+    }
 }
 
 async function handleOffenderRegistration(e) {
@@ -472,6 +540,7 @@ async function handleOffenderRegistration(e) {
         address: document.getElementById('offender-address').value,
         case_officer: document.getElementById('offender-officer').value,
         device_id: document.getElementById('offender-device').value || null,
+        profile_pic_url: document.getElementById('offender-profile-pic').value || null, // NEW
         monitoring_start: new Date(document.getElementById('offender-start-date').value).toISOString(),
         monitoring_end: new Date(document.getElementById('offender-end-date').value).toISOString(),
         notes: document.getElementById('offender-notes').value || '',
@@ -560,10 +629,16 @@ function showPOIForm() {
         return;
     }
     
+    if (!form) {
+        console.error('❌ POI form not found!');
+        return;
+    }
+    
     formContainer.classList.remove('hidden');
     form.reset();
     
-    console.log('✅ POI form container classes:', formContainer.className);
+    console.log('✅ POI form container classes after showing:', formContainer.className);
+    console.log('✅ POI form container display:', window.getComputedStyle(formContainer).display);
     console.log('✅ POI form shown successfully');
 }
 
@@ -1015,34 +1090,101 @@ window.deleteDevice = deleteDevice;
 // ==================== OFFENDER DETAIL ====================
 function showOffenderDetail(offenderId) {
     const offender = appState.offenders.find(o => o.id === offenderId);
-    if (!offender) return;
-    
-    appState.selectedOffender = offender;
-    
-    document.getElementById('detail-name').textContent = offender.name;
-    document.getElementById('detail-avatar').textContent = offender.name.split(' ').map(n => n[0]).join('').substring(0, 2);
-    document.getElementById('detail-risk').textContent = offender.risk_level.toUpperCase();
-    document.getElementById('detail-risk').className = `risk-badge ${offender.risk_level}`;
-    document.getElementById('detail-crime').textContent = CONFIG.CRIME_TYPES[offender.crime_type];
-    document.getElementById('detail-id-number').textContent = offender.id_number;
-    document.getElementById('detail-dob').textContent = offender.date_of_birth;
-    document.getElementById('detail-address').textContent = offender.address;
-    document.getElementById('detail-phone').textContent = offender.phone;
-    document.getElementById('detail-officer').textContent = offender.case_officer;
-    document.getElementById('detail-device').textContent = offender.device_id || 'None';
-    document.getElementById('detail-notes').textContent = offender.notes || 'No notes';
-    
-    const startDate = new Date(offender.monitoring_start).toLocaleDateString();
-    const endDate = new Date(offender.monitoring_end).toLocaleDateString();
-    document.getElementById('detail-period').textContent = `${startDate} - ${endDate}`;
-    
-    if (offender.current_location) {
-        document.getElementById('detail-location').textContent = 
-            `${offender.current_location.lat.toFixed(6)}, ${offender.current_location.lon.toFixed(6)}`;
-        document.getElementById('detail-last-update').textContent = 
-            `Last Update: ${new Date().toLocaleTimeString()}`;
+    if (!offender) {
+        console.error('Offender not found:', offenderId);
+        return;
     }
     
+    console.log('📋 Showing detail for:', offender.name);
+    appState.selectedOffender = offender;
+    
+    // Set name
+    document.getElementById('detail-name').textContent = offender.name;
+    
+    // ========== FIX: PROFILE PHOTO DISPLAY ==========
+    const profilePhotoContainer = document.querySelector('.profile-photo');
+    
+    if (!profilePhotoContainer) {
+        console.error('❌ Profile photo container not found!');
+    } else {
+        // Get profile picture URL (support both new and legacy field names)
+        const profilePicUrl = offender.profile_pic_url || offender.photo_url;
+        
+        // Generate initials from name (e.g., "Daniel Fernando" → "DF")
+        const nameParts = offender.name.trim().split(' ').filter(part => part.length > 0);
+        const initials = nameParts
+            .slice(0, 2)  // Take first two words
+            .map(part => part[0].toUpperCase())  // Get first letter, uppercase
+            .join('');  // Join them
+        
+        console.log('👤 Name:', offender.name);
+        console.log('🔤 Initials:', initials);
+        console.log('🖼️ Profile URL:', profilePicUrl || 'None');
+        
+        if (profilePicUrl && profilePicUrl.trim() !== '') {
+            // Display actual profile picture
+            console.log('✅ Using profile picture');
+            profilePhotoContainer.innerHTML = `
+                <img src="${profilePicUrl}" 
+                     alt="${offender.name}" 
+                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
+                     onerror="this.onerror=null;this.src='https://via.placeholder.com/150?text=${initials}';" />
+            `;
+        } else {
+            // Display default avatar with initials
+            console.log('✅ Using initials avatar');
+            profilePhotoContainer.innerHTML = `
+                <div class="default-avatar">${initials}</div>
+            `;
+        }
+    }
+    
+    // Set risk and crime badges
+    const riskElement = document.getElementById('detail-risk');
+    if (riskElement) {
+        riskElement.textContent = offender.risk_level.toUpperCase();
+        riskElement.className = `risk-badge ${offender.risk_level}`;
+    }
+    
+    const crimeElement = document.getElementById('detail-crime');
+    if (crimeElement) {
+        crimeElement.textContent = CONFIG.CRIME_TYPES[offender.crime_type] || offender.crime_type;
+    }
+    
+    // Set all info fields
+    const setField = (id, value) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value || 'N/A';
+        } else {
+            console.warn(`Element not found: ${id}`);
+        }
+    };
+    
+    setField('detail-id-number', offender.id_number);
+    setField('detail-dob', offender.date_of_birth);
+    setField('detail-address', offender.address);
+    setField('detail-phone', offender.phone);
+    setField('detail-officer', offender.case_officer);
+    setField('detail-device', offender.device_id || 'None');
+    setField('detail-notes', offender.notes || 'No notes');
+    
+    // Format and set monitoring period
+    const startDate = new Date(offender.monitoring_start).toLocaleDateString();
+    const endDate = new Date(offender.monitoring_end).toLocaleDateString();
+    setField('detail-period', `${startDate} - ${endDate}`);
+    
+    // Set location info
+    if (offender.current_location) {
+        setField('detail-location', 
+            `${offender.current_location.lat.toFixed(6)}, ${offender.current_location.lon.toFixed(6)}`);
+        setField('detail-last-update', `Last Update: ${new Date().toLocaleTimeString()}`);
+    } else {
+        setField('detail-location', 'No location data');
+        setField('detail-last-update', 'Never updated');
+    }
+    
+    // Add delete button if it doesn't exist
     const detailContainer = document.querySelector('.detail-panel');
     if (detailContainer) {
         let deleteBtn = detailContainer.querySelector('.btn-delete-offender');
@@ -1059,21 +1201,49 @@ function showOffenderDetail(offenderId) {
         }
     }
     
+    // Switch to detail view
     switchView('offender-detail');
     
+    // Initialize and update detail map
     setTimeout(() => {
         if (!detailMap) {
             detailMap = new MapManager('detail-map');
             detailMap.initialize();
+            console.log('📍 Detail map initialized');
         }
         
         if (offender.current_location) {
             detailMap.clearMarkers();
             detailMap.addOffenderMarker(offender);
             detailMap.centerOn(offender.current_location.lat, offender.current_location.lon);
+            console.log('📍 Map centered on offender location');
+        } else {
+            console.log('⚠️ No location data for this offender');
         }
     }, 100);
 }
+
+// ========== HELPER FUNCTION: Generate Initials ==========
+function generateInitials(fullName) {
+    if (!fullName || typeof fullName !== 'string') {
+        return '??';
+    }
+    
+    const nameParts = fullName.trim().split(' ').filter(part => part.length > 0);
+    
+    if (nameParts.length === 0) {
+        return '??';
+    }
+    
+    // Take first two words and get first letter of each
+    const initials = nameParts
+        .slice(0, 2)
+        .map(part => part[0].toUpperCase())
+        .join('');
+    
+    return initials || '??';
+}
+
 
 async function deleteOffender(offenderId) {
     const offender = appState.offenders.find(o => o.id === offenderId);
@@ -1103,8 +1273,44 @@ async function deleteOffender(offenderId) {
     }
 }
 
+function previewProfilePicture() {
+    const urlInput = document.getElementById('offender-profile-pic');
+    const previewContainer = document.getElementById('profile-pic-preview');
+    
+    if (!previewContainer) {
+        // Create preview container if it doesn't exist
+        const preview = document.createElement('div');
+        preview.id = 'profile-pic-preview';
+        preview.style.cssText = 'margin-top: 10px; display: none;';
+        urlInput.parentElement.appendChild(preview);
+    }
+    
+    const url = urlInput.value.trim();
+    const preview = document.getElementById('profile-pic-preview');
+    
+    if (url) {
+        preview.style.display = 'block';
+        preview.innerHTML = `
+        <img src="${url}" 
+        alt="Profile Preview" 
+        style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-blue);"
+        onerror="this.onerror=null; this.parentElement.innerHTML='<p style=\\"color: var(--danger);\\">❌ Invalid image URL</p>';">
+        <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;">Preview</p>
+        `;
+    } else {
+        preview.style.display = 'none';
+        preview.innerHTML = '';
+    }
+}
+
+
 window.showOffenderDetail = showOffenderDetail;
 window.deleteOffender = deleteOffender;
+window.previewProfilePicture = previewProfilePicture;
+// Export for testing
+window.generateInitials = generateInitials;
+
+console.log('✅ Profile picture functionality loaded');
 
 // ==================== ALERTS ====================
 async function acknowledgeAlert(alertId) {

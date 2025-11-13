@@ -6,6 +6,7 @@
     "crime_type": "sexual_offense",
     "risk_level": "high",
     "photo_url": null,
+    "profile_pic_url": null,
     "date_of_birth": "1980-12-15",
     "address": "Jl. Sudirman No. 123, Jakarta Selatan",
     "phone": "021-555-0123",
@@ -28,6 +29,7 @@
     "crime_type": "drug_offense",
     "risk_level": "medium",
     "photo_url": null,
+    "profile_pic_url": null,
     "date_of_birth": "1975-08-20",
     "address": "Jl. Thamrin No. 45, Jakarta Pusat",
     "phone": "021-555-0456",
@@ -42,5 +44,28 @@
     },
     "geofence_zones": [],
     "notes": "Drug trafficking case. Curfew from 22:00 to 06:00."
+  },
+  "3be941ce-b907-4428-b198-ac2f9b9fe497": {
+    "id": "3be941ce-b907-4428-b198-ac2f9b9fe497",
+    "name": "Daniel Fernando Parulian Simangunsong",
+    "id_number": "1234567890213",
+    "crime_type": "sexual_offense",
+    "risk_level": "high",
+    "photo_url": "https://asura-s3.stellardata.ai/comvis/test-documents/photo_2025-11-12_18-38-22.jpg",
+    "profile_pic_url": null,
+    "date_of_birth": "2001-06-04",
+    "address": "Jl wai kambas",
+    "phone": "08762318321932",
+    "case_officer": "Budi Setianto",
+    "monitoring_start": "2025-11-12 00:00:00+00:00",
+    "monitoring_end": "2026-11-12 00:00:00+00:00",
+    "device_id": "user-mobile-123",
+    "current_location": {
+      "lat": -6.2683,
+      "lon": 106.6871,
+      "alt": 63.39999771118164
+    },
+    "geofence_zones": [],
+    "notes": ""
   }
 }

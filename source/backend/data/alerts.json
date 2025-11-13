@@ -1,0 +1,92 @@
+{
+  "90536725-b982-433d-bde5-2568c5dc74ec": {
+    "id": "90536725-b982-433d-bde5-2568c5dc74ec",
+    "offender_id": "3be941ce-b907-4428-b198-ac2f9b9fe497",
+    "alert_type": "poi_proximity",
+    "severity": "high",
+    "message": "Offender Daniel Fernando Parulian Simangunsong is within 1268m of POI: Sekolah Islam Amelia",
+    "timestamp": "2025-11-12 17:52:16.584255",
+    "acknowledged": false
+  },
+  "430f8adf-f0ab-4fd8-8a97-b739b21c88a2": {
+    "id": "430f8adf-f0ab-4fd8-8a97-b739b21c88a2",
+    "offender_id": "3be941ce-b907-4428-b198-ac2f9b9fe497",
+    "alert_type": "poi_proximity",
+    "severity": "high",
+    "message": "Offender Daniel Fernando Parulian Simangunsong is within 1268m of POI: Sekolah Islam Amelia",
+    "timestamp": "2025-11-12 17:52:16.600120",
+    "acknowledged": false
+  },
+  "72b359f6-711f-451b-aaa8-02b221ce8a4b": {
+    "id": "72b359f6-711f-451b-aaa8-02b221ce8a4b",
+    "offender_id": "3be941ce-b907-4428-b198-ac2f9b9fe497",
+    "alert_type": "poi_proximity",
+    "severity": "high",
+    "message": "Offender Daniel Fernando Parulian Simangunsong is within 1268m of POI: Sekolah Islam Amelia",
+    "timestamp": "2025-11-12 17:52:16.658354",
+    "acknowledged": false
+  },
+  "b0fb5338-ff0b-42d2-926c-7df036b56b07": {
+    "id": "b0fb5338-ff0b-42d2-926c-7df036b56b07",
+    "offender_id": "3be941ce-b907-4428-b198-ac2f9b9fe497",
+    "alert_type": "poi_proximity",
+    "severity": "high",
+    "message": "Offender Daniel Fernando Parulian Simangunsong is within 1268m of POI: Sekolah Islam Amelia",
+    "timestamp": "2025-11-12 17:52:16.674290",
+    "acknowledged": false
+  },
+  "be1e601a-a94c-46b2-96ec-52f157a6e306": {
+    "id": "be1e601a-a94c-46b2-96ec-52f157a6e306",
+    "offender_id": "3be941ce-b907-4428-b198-ac2f9b9fe497",
+    "alert_type": "poi_proximity",
+    "severity": "high",
+    "message": "Offender Daniel Fernando Parulian Simangunsong is within 1268m of POI: Sekolah Islam Amelia",
+    "timestamp": "2025-11-12 17:55:55.230827",
+    "acknowledged": false
+  },
+  "37350f52-d7cf-46c1-be05-909fc4d1a849": {
+    "id": "37350f52-d7cf-46c1-be05-909fc4d1a849",
+    "offender_id": "3be941ce-b907-4428-b198-ac2f9b9fe497",
+    "alert_type": "poi_proximity",
+    "severity": "high",
+    "message": "Offender Daniel Fernando Parulian Simangunsong is within 1268m of POI: Sekolah Islam Amelia",
+    "timestamp": "2025-11-12 17:55:55.299150",
+    "acknowledged": false
+  },
+  "189bc55c-3920-4fcb-891e-2a02728ac977": {
+    "id": "189bc55c-3920-4fcb-891e-2a02728ac977",
+    "offender_id": "3be941ce-b907-4428-b198-ac2f9b9fe497",
+    "alert_type": "poi_proximity",
+    "severity": "high",
+    "message": "Offender Daniel Fernando Parulian Simangunsong is within 1274m of POI: Sekolah Islam Amelia",
+    "timestamp": "2025-11-12 17:56:11.204778",
+    "acknowledged": false
+  },
+  "3580894a-fc30-4ba3-abb2-a778e4086aa7": {
+    "id": "3580894a-fc30-4ba3-abb2-a778e4086aa7",
+    "offender_id": "3be941ce-b907-4428-b198-ac2f9b9fe497",
+    "alert_type": "poi_proximity",
+    "severity": "high",
+    "message": "Offender Daniel Fernando Parulian Simangunsong is within 1274m of POI: Sekolah Islam Amelia",
+    "timestamp": "2025-11-12 17:56:11.287797",
+    "acknowledged": false
+  },
+  "8e88d857-f248-4131-acbe-a4afe96350bc": {
+    "id": "8e88d857-f248-4131-acbe-a4afe96350bc",
+    "offender_id": "3be941ce-b907-4428-b198-ac2f9b9fe497",
+    "alert_type": "poi_proximity",
+    "severity": "high",
+    "message": "Offender Daniel Fernando Parulian Simangunsong is within 1268m of POI: Sekolah Islam Amelia",
+    "timestamp": "2025-11-12 19:08:58.776996",
+    "acknowledged": false
+  },
+  "e841967b-b90c-49cb-a748-c8f1c0d46e09": {
+    "id": "e841967b-b90c-49cb-a748-c8f1c0d46e09",
+    "offender_id": "3be941ce-b907-4428-b198-ac2f9b9fe497",
+    "alert_type": "poi_proximity",
+    "severity": "high",
+    "message": "Offender Daniel Fernando Parulian Simangunsong is within 1268m of POI: Sekolah Islam Amelia",
+    "timestamp": "2025-11-12 19:08:58.792812",
+    "acknowledged": false
+  }
+}

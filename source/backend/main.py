@@ -1,6 +1,6 @@
 """
 Tactical Dashboard for High-Risk Offender Monitoring
-FastAPI Backend - Enhanced with JSON Database and POI Support
+FastAPI Backend - Enhanced with Profile Picture URL Support
 """
 
 from fastapi import FastAPI, WebSocket, HTTPException, Depends, status, WebSocketDisconnect
@@ -16,7 +16,7 @@ import websockets
 from enum import Enum
 from pathlib import Path
 
-app = FastAPI(title="Tactical Dashboard API", version="2.0.0")
+app = FastAPI(title="Tactical Dashboard API", version="2.1.0")
 
 # CORS configuration
 app.add_middleware(
@@ -87,7 +87,8 @@ class Offender(BaseModel):
     id_number: str
     crime_type: CrimeType
     risk_level: RiskLevel
-    photo_url: Optional[str] = None
+    photo_url: Optional[str] = None  # Legacy field for backwards compatibility
+    profile_pic_url: Optional[str] = None  # NEW: Profile picture URL
     date_of_birth: str
     address: str
     phone: str
@@ -623,13 +624,14 @@ async def startup_event():
         )
         devices_db[device2.id] = device2
         
-        # Sample offenders
+        # Sample offenders with profile pictures
         offender1 = Offender(
             id="offender-001",
             name="Ahmad Wijaya",
             id_number="3174051980120001",
             crime_type=CrimeType.SEXUAL_OFFENSE,
             risk_level=RiskLevel.HIGH,
+            profile_pic_url="https://i.pravatar.cc/300?img=12",  # Sample profile pic
             date_of_birth="1980-12-15",
             address="Jl. Sudirman No. 123, Jakarta Selatan",
             phone="021-555-0123",
@@ -649,6 +651,7 @@ async def startup_event():
             id_number="3175021975080002",
             crime_type=CrimeType.DRUG_OFFENSE,
             risk_level=RiskLevel.MEDIUM,
+            profile_pic_url="https://i.pravatar.cc/300?img=33",  # Sample profile pic
             date_of_birth="1975-08-20",
             address="Jl. Thamrin No. 45, Jakarta Pusat",
             phone="021-555-0456",

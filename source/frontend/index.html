@@ -207,6 +207,16 @@
                                 <label for="offender-phone">Phone Number*</label>
                                 <input type="tel" id="offender-phone" required placeholder="e.g., 021-555-0123">
                             </div>
+                            <div class="form-group">
+                                <label for="offender-profile-pic">Profile Picture URL</label>
+                                <input 
+                                    type="url" 
+                                    id="offender-profile-pic" 
+                                    placeholder="https://example.com/photo.jpg"
+                                    oninput="previewProfilePicture()">
+                                <small>Enter a valid image URL (optional)</small>
+                                <!-- Preview container will be dynamically created here -->
+                            </div>
                             <div class="form-group full-width">
                                 <label for="offender-address">Address*</label>
                                 <input type="text" id="offender-address" required placeholder="Full address">
